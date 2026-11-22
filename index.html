@@ -72,9 +72,9 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-famil
 .home>*:not(canvas){position:relative;z-index:1}
 .g-bg,.g-fg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .g-bg{z-index:0}.g-fg{z-index:2}
-.home .time{margin-top:auto;font-family:'Pixelify Sans',monospace;font-weight:700;font-size:min(27cqh,17cqw);line-height:1;letter-spacing:.02em;color:#fff4d6;
-  text-shadow:0 .05em 0 #c9843a,.05em .1em 0 #5a3214,-.03em .1em 0 #5a3214}
-.home .time span{font-size:.32em;color:#ffd25a;margin-left:.2em;text-shadow:.06em .1em 0 #5a3214}
+.home .time{margin-top:auto;font-family:Poppins,system-ui,sans-serif;font-weight:700;font-size:min(30cqh,18cqw);line-height:1;letter-spacing:.05em;color:#ffffff;
+  -webkit-text-stroke:.06em #3b2116;paint-order:stroke fill;text-shadow:0 .06em 0 #3b2116,0 .1em .12em rgba(0,0,0,.25);font-variant-numeric:tabular-nums}
+.home .time span{font-family:Poppins,system-ui,sans-serif;font-weight:700;font-size:.3em;color:#ffd25a;margin-left:.2em;letter-spacing:.02em;-webkit-text-stroke:.1em #3b2116;paint-order:stroke fill;text-shadow:0 .1em 0 #3b2116}
 .home .rule{width:min(24cqw,190px);height:min(1.4cqh,5px);border-radius:2px;margin:2.6cqh auto 2cqh;
   background:#c9843a;box-shadow:0 2px 0 #5a3214}
 .home .dateline{font-family:'Pixelify Sans',monospace;font-weight:500;font-size:min(5.4cqh,3.1cqw);color:#f6e3b4;text-shadow:0 .1em 0 #5a3214}
@@ -128,6 +128,19 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-famil
 .delta.down{color:#7fd8a8} .delta.up{color:var(--red)}
 svg.spark{width:100%;height:60px;display:block;margin-top:16px}
 .week{font-size:13px;color:var(--mute);margin-top:8px}
+.wbody{gap:56px;padding:0 40px}
+.wstats{display:flex;align-items:center;gap:56px}
+.wleft{flex:none}
+.wright{flex:1;max-width:620px}
+.wch{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:600;margin-bottom:10px}
+.wcards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.wk{border-radius:20px;padding:18px 16px;text-align:center}
+.wk.cur{border-color:var(--accent);background:rgba(65,105,225,.16)}
+.wk b{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.wk span{display:block;font-size:40px;font-weight:700;color:var(--accent2);margin:6px 0 2px;line-height:1}
+.wk span small{font-size:14px;color:var(--mute);font-weight:500}
+.wk span.none{color:#3a4a8a}
+.wk i{display:block;font-style:normal;font-size:12px;color:var(--mute)}
 
 /* feeds */
 .feed{flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;column-count:2;column-gap:28px}
@@ -183,10 +196,35 @@ body.night .home .rule{margin:3.5cqh auto 3cqh}
 body.night .home .dateline{font-size:min(7.5cqh,4.4cqw);color:#f6e3b4}
 body.night .home .time{margin-bottom:0}body.night .home .dateline{margin-bottom:auto}
 body.night .dots,body.night .pill{opacity:0}
+
+/* ===== liquid glass (all pages except the main page) ===== */
+.slide:not(.home){position:relative;isolation:isolate}
+.slide:not(.home) :is(.btn,.box,.dbox,.x,.wk,.tile,.chart,.chip,input,textarea){
+  background:rgba(255,255,255,.08) !important;
+  border:1px solid rgba(255,255,255,.22) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(170%);backdrop-filter:blur(18px) saturate(170%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -1px 0 rgba(255,255,255,.06),0 8px 24px rgba(0,0,0,.28)}
+.slide:not(.home) .btn{border-radius:999px !important;padding:12px 24px}
+.slide:not(.home) :is(.btn,.item.done .box,.dbox.on,.wk.cur){
+  background:rgba(65,105,225,.55) !important;
+  border-color:rgba(190,210,255,.55) !important}
+.slide:not(.home) :is(.btn,.box,.dbox):active{transform:scale(.96)}
+
+/* ===== main page scene stays behind the other pages, blurred ===== */
+.backdrop,.backdrop-tint{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:0;transition:opacity .7s ease}
+.backdrop{filter:blur(16px) saturate(1.15);transform:scale(1.12)}
+.backdrop-tint{background:rgba(7,13,36,.66)}
+.slide:not(.home){--mute:#c6d0f2}
+.slide:not(.home) .wheel div{color:#aab6e6}
+.wk span{white-space:nowrap;font-size:clamp(22px,4.2vw,40px) !important}
+body.offhome .backdrop,body.offhome .backdrop-tint{opacity:1}
+.home>*:not(canvas){transition:opacity .45s ease,filter .45s ease}
+body.offhome .home>*:not(canvas){opacity:0;filter:blur(12px)}
 </style>
 </head>
 <body>
 <div class="stage">
+ <canvas class="backdrop" id="backdrop"></canvas><div class="backdrop-tint"></div>
  <div class="viewport" id="vp">
   <div class="track" id="track">
 
@@ -219,11 +257,14 @@ body.night .dots,body.night .pill{opacity:0}
       <div class="wbody">
         <div class="wheelbox"><div class="wheel" id="wheel"></div><div class="band"></div></div>
         <div class="wstats">
-          <div class="big" id="w-sel">--<small> kg</small></div>
-          <div class="delta" id="w-delta">Scroll the wheel, then save</div>
-          <button class="btn" id="w-save">Save today</button>
-          <svg class="spark" id="spark" viewBox="0 0 200 60" preserveAspectRatio="none"></svg>
-          <div class="week" id="w-week"></div>
+          <div class="wleft">
+            <div class="big" id="w-sel">--<small> kg</small></div>
+            <div class="delta" id="w-delta">Scroll the wheel, then save</div>
+            <button class="btn" id="w-save">Save today</button>
+          </div>
+          <div class="wright"><div class="wch">Weekly average</div><div class="wcards" id="w-weeks"></div></div>
+          <svg class="spark" id="spark" viewBox="0 0 200 60" style="display:none"></svg>
+          <div id="w-week" style="display:none"></div>
         </div>
       </div>
     </section>
@@ -281,6 +322,7 @@ body.night .dots,body.night .pill{opacity:0}
 
   /* ================= CAROUSEL ================= */
   const SLIDE_MS = 20000;     // auto-advance every 20 s
+  const HOME_MS  = 180000;    // main page stays 3 min before moving on
   const HOLD_MS  = 5000;      // after a tap or swipe, stay put; every touch restarts these 5 s
   const track=$("track"), N_SLIDES=track.children.length;
   let idx=0, lastMove=Date.now(), holdUntil=0, typing=false;
@@ -302,6 +344,7 @@ body.night .dots,body.night .pill{opacity:0}
   function showDots(){ [...$("dots").children].forEach((d,k)=>d.classList.toggle("on",k===idx)); }
   function go(i,fade){
     lastMove=Date.now(); clearTimeout(wrapT);
+    document.body.classList.toggle("offhome", (((i%N_SLIDES)+N_SLIDES)%N_SLIDES)!==0);
     if(track.querySelector(".clone")){ setX(idx,false); dropClone(); } // finish any wrap in progress
     track.style.transition=""; track.style.opacity=1;
     if(fade){                   // automatic advance: fade out, switch, fade in
@@ -335,7 +378,7 @@ body.night .dots,body.night .pill{opacity:0}
       return;
     }
     if(holdUntil){ holdUntil=0; go(idx+1,true); return; }   // 5 s with no touch: carousel carries on with a fade
-    if(now-lastMove>=SLIDE_MS) go(idx+1,true);
+    if(now-lastMove>=(idx===0?HOME_MS:SLIDE_MS)) go(idx+1,true);
   },500);
   go(0);
 
@@ -408,8 +451,10 @@ body.night .dots,body.night .pill{opacity:0}
   let todayKey=dayKey(new Date());
   const NIGHT_ON=true;    // night mode (12am-6am) is switched off for now; set to true to bring it back
   const isNight=()=>NIGHT_ON && new Date().getHours()<6;
+  const TZ="Asia/Manila";   // always show Philippine time, whatever the phone is set to
+  const phNow=()=>new Date(new Date().toLocaleString("en-US",{timeZone:TZ}));
   function tick(){
-    const d=new Date();
+    const d=phNow();
     let h=d.getHours(); const ap=h>=12?"pm":"am"; h=h%12||12;
     $("time").firstChild.nodeValue=h+":"+pad(d.getMinutes());
     $("ampm").textContent=ap;
@@ -429,6 +474,7 @@ body.night .dots,body.night .pill{opacity:0}
     if(!items.length) parts.push("no priorities added yet");
     const last=weights[weights.length-1];
     if(last) parts.push("last weight "+last.kg.toFixed(1)+" kg");
+    if(weights.length) parts.push("avg "+(weights.reduce((a,x)=>a+x.kg,0)/weights.length).toFixed(1)+" kg");
     $("glance").textContent=parts.join("  ·  ");
   }
   try{ if(navigator.wakeLock) navigator.wakeLock.request("screen").catch(()=>{}); }catch(e){}
@@ -530,6 +576,15 @@ body.night .dots,body.night .pill{opacity:0}
   function showSel(){ $("w-sel").firstChild.nodeValue=valAt().toFixed(1); }
   wheel.addEventListener("scroll",()=>{ requestAnimationFrame(showSel); hold(); },{passive:true});
   let weights=[], wheelInit=false;
+  function renderMonth(){
+    const m=todayKey.slice(0,7), ranges=[[1,7],[8,14],[15,21],[22,31]], mon=new Date().toLocaleString("en",{month:"short"});
+    const wk=ranges.map(([lo,hi],i)=>{
+      const l=weights.filter(w=>w.date.slice(0,7)===m&&+w.date.slice(8,10)>=lo&&+w.date.slice(8,10)<=hi);
+      return {n:i+1,lbl:mon+" "+lo+"-"+(i===3?"end":hi),days:l.length,avg:l.length?l.reduce((a,x)=>a+x.kg,0)/l.length:null,cur:+todayKey.slice(8,10)>=lo&&+todayKey.slice(8,10)<=hi};
+    });
+    $("w-weeks").innerHTML=wk.map(w=>'<div class="wk'+(w.cur?" cur":"")+'"><b>Week '+w.n+'</b>'+
+      (w.avg===null?'<span class="none">--</span>':'<span>'+w.avg.toFixed(1)+'<small> kg</small></span>')+'<i>'+w.lbl+'</i></div>').join("");
+  }
   function renderWeights(){
     weights.sort((a,b)=>a.date<b.date?-1:1);
     const last=weights[weights.length-1];
@@ -548,6 +603,7 @@ body.night .dots,body.night .pill{opacity:0}
     let wk="Log daily to build your weekly average.";
     if(tw.length){ wk="This week avg "+avg(tw).toFixed(1)+" kg ("+tw.length+" days)"; if(pw.length){const d=avg(tw)-avg(pw); wk+=" · "+(d>0?"+":"")+d.toFixed(1)+" vs last week";} }
     $("w-week").textContent=wk;
+    renderMonth();
     const pts=weights.slice(-14), sp=$("spark");
     if(pts.length<2){sp.innerHTML="";}
     else{
@@ -748,7 +804,7 @@ body.night .dots,body.night .pill{opacity:0}
       g.fillStyle=c1; g.fillRect(x+3,y,w-8,2); g.fillRect(x+1,y+2,w-2,3); g.fillRect(x,y+4,w,2); g.fillRect(x+w*.3|0,y-2,w*.3|0,2);
       g.fillStyle=c2; g.fillRect(x+1,y+5,w-2,1); }
     function drawSky(g){
-      const d=new Date(), h=d.getHours()+d.getMinutes()/60;
+      const d=phNow(), h=d.getHours()+d.getMinutes()/60;
       const [t0,z0,t1,z1,t]=skyAt(h), top=mix(t0,t1,t), hor=mix(z0,z1,t);
       // stepped bands, farm-game style
       const bands=8, bh=Math.ceil(gy/bands);
@@ -764,6 +820,9 @@ body.night .dots,body.night .pill{opacity:0}
       if(h>=5.5&&h<=18.5){
         const p=(h-5.5)/13, sx=Math.round(8+p*(gw-16)), sy=Math.round(gy-4-Math.sin(Math.PI*p)*gy*.72), r=5;
         const low=Math.min(1,Math.abs(p-.5)*2.2);
+        const ct=timeEl.offsetTop/P, cb=(timeEl.offsetTop+timeEl.offsetHeight)/P;
+        const hidden = sx+r+2>clockL && sx-r-2<clockL+clockW+ (timeEl.offsetWidth*0)/P && sy+r+2>ct && sy-r-2<cb;   // keep the sun from sitting behind the digits
+        if(!hidden)
         for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){ const q=x*x+y*y; if(q<=r*r){ g.fillStyle=q>(r-1.5)*(r-1.5)?mix("#ffd25a","#f07a3a",low):mix("#fff3b0","#ffc070",low); g.fillRect(sx+x,sy+y,1,1); } }
       } else {
         const mx=gw-26,my=12,mr=5;
@@ -1101,9 +1160,50 @@ body.night .dots,body.night .pill{opacity:0}
       for(const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1]]) dst.drawImage(sil,dx,dy);
       dst.drawImage(lay,0,0);
     }
+    /* ---- Stardew-style sprite pass: 2x smooth upscale, thin coloured outlines, eye shine ---- */
+    const hi=document.createElement("canvas"), hix=hi.getContext("2d");
+    const OUT=0xff16213b; // #3b2116 as little-endian uint32
+    const EYES=new Set([0xff2f4a2f,0xff10101a]);
+    const dk=(c,k)=>{ const r=c&255,g=c>>8&255,b=c>>16&255; return 0xff000000|((b*k)|0)<<16|((g*k)|0)<<8|((r*k)|0); };
+    const lt=(c,k)=>{ const f=v=>(v+(255-v)*k)|0, r=c&255,g=c>>8&255,b=c>>16&255; return 0xff000000|f(b)<<16|f(g)<<8|f(r); };
+    function hiRes(){
+      const w=gw,h=gh,W2=w*2,H2=h*2;
+      if(hi.width!==W2||hi.height!==H2){ hi.width=W2; hi.height=H2; }
+      const src=new Uint32Array(fx.getImageData(0,0,w,h).data.buffer);
+      const img=hix.createImageData(W2,H2), d=new Uint32Array(img.data.buffer);
+      const at=(x,y)=>(x<0||y<0||x>=w||y>=h)?0:src[y*w+x];
+      for(let y=0;y<h;y++) for(let x=0;x<w;x++){                       // EPX / Scale2x
+        const P0=src[y*w+x]; if(!P0&&!at(x-1,y)&&!at(x+1,y)&&!at(x,y-1)&&!at(x,y+1)) continue;
+        const A=at(x,y-1),B=at(x+1,y),C=at(x-1,y),D=at(x,y+1);
+        let p1=P0,p2=P0,p3=P0,p4=P0;
+        if(C===A&&C!==D&&A!==B) p1=A; if(A===B&&A!==C&&B!==D) p2=B;
+        if(D===C&&D!==B&&C!==A) p3=C; if(B===D&&B!==A&&D!==C) p4=D;
+        const i=(2*y)*W2+2*x; d[i]=p1; d[i+1]=p2; d[i+W2]=p3; d[i+W2+1]=p4;
+      }
+      const o=d.slice(), g=(x,y)=>(x<0||y<0||x>=W2||y>=H2)?0:o[y*W2+x];
+      const N4=[[0,-1],[1,0],[0,1],[-1,0]], N8=[[0,-1],[1,0],[0,1],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]];
+      for(let y=0;y<H2;y++) for(let x=0;x<W2;x++){
+        const c=o[y*W2+x]; if(c!==OUT) continue;
+        let edge=false; for(const[dx,dy] of N4) if(!g(x+dx,y+dy)) edge=true;
+        let fill=0; for(const[dx,dy] of N8){ const n=g(x+dx,y+dy); if(n&&n!==OUT&&!EYES.has(n)){ fill=n; break; } }
+        if(!edge){ if(fill) d[y*W2+x]=fill; }          // thin the doubled outline to 1 fine pixel
+        else if(fill) d[y*W2+x]=dk(fill,.42);           // coloured outline like Stardew's
+      }
+      const q=d.slice(), G=(x,y)=>(x<0||y<0||x>=W2||y>=H2)?0:q[y*W2+x];
+      for(let y=0;y<H2;y++) for(let x=0;x<W2;x++){
+        const c=q[y*W2+x]; if(!c) continue;
+        if(EYES.has(c)){ if(!EYES.has(G(x,y-1))&&!EYES.has(G(x-1,y))) d[y*W2+x]=0xffffffff; continue; }   // eye shine
+        const up=G(x,y-1), up2=G(x,y-2), dn=G(x,y+1), dn2=G(x,y+2);
+        if(!up||!up2) continue;
+        if(!dn) d[y*W2+x]=dk(c,.8); else if(!dn2) d[y*W2+x]=dk(c,.9);                                  // soft underside
+      }
+      hix.putImageData(img,0,0);
+    }
+    const bd=$("backdrop"), bdx=bd.getContext("2d"); let skip=0;
     function loop(){
       setTimeout(loop,1000/12);
-      if(document.hidden || idx!==0) return;
+      if(document.hidden) return;
+      if(idx!==0 && (++skip)%2) return;   // behind the blur: half frame rate is plenty
       if(!layout()) return;
       frame++;
       // live sky + cached ground
@@ -1116,7 +1216,8 @@ body.night .dots,body.night .pill{opacity:0}
       cats.forEach(c=>drawCat(fx,c)); drawFight(fx); drawFur(fx);
       outlined(fx,g=>{ people.forEach(p=>{ if(p.on) drawPerson(g,p); }); });
       drawNotes(fx); drawHearts(fx);
-      blit(fgx,offF);
+      hiRes(); blit(fgx,hi);
+      if(idx!==0){ if(bd.width!==gw||bd.height!==gh){ bd.width=gw; bd.height=gh; } bdx.drawImage(skyC,0,0); bdx.drawImage(hi,0,0,gw,gh); }
     }
     if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{W=0;});
     loop();
