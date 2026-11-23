@@ -4,7 +4,9 @@
       {"t": "Finalize Aether video 1", "p": 1},
       {"t": "Finalize Aether video 2", "p": 1},
       {"t": "Start Aether video 3", "p": 2},
-      {"t": "Finish Stephen's video", "p": 3}
+      {"t": "Finish Stephen's video", "p": 3},
+      {"t": "Walk", "p": 3},
+      {"t": "Lash day 3", "p": 3}
     ]
   }
 }
