@@ -20,6 +20,26 @@ window.claude={use:async function(name){
   const snap=p=>({exists:!!store[p],data:()=>store[p]?JSON.parse(JSON.stringify(store[p])):undefined});
   const colSnap=c=>({docs:Object.keys(store).filter(k=>k.startsWith(c+"/")).map(k=>({id:k.slice(c.length+1),data:()=>JSON.parse(JSON.stringify(store[k]))}))});
   const notify=p=>{ (subs[p]||[]).forEach(f=>f(snap(p))); const c=p.split("/")[0]; (csubs[c]||[]).forEach(f=>f(colSnap(c))); };
+  /* Task list pushed from Claude: tasks.json in this repo, checked every minute.
+     Tasks from the file come first, sorted by priority (p: 1 = highest). Ticks and tasks you add on this phone are kept. */
+  const todayStr=()=>{ const d=new Date(), z=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate()); };
+  async function pullTasks(){
+    try{
+      const r=await fetch("tasks.json?t="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
+      const j=await r.json(); let changed=false;
+      for(const day in j){
+        const rem=(j[day].items||[]).slice().sort((a,b)=>(a.p||9)-(b.p||9));
+        const path="checklist/"+day, cur=(store[path]&&Array.isArray(store[path].items))?store[path].items:[];
+        const doneBy={}; cur.forEach(i=>{ doneBy[i.t]=i.done; });
+        const remT=new Set(rem.map(i=>i.t));
+        const next=rem.map(i=>({t:i.t,done:!!doneBy[i.t]||!!i.done,p:i.p,r:1}));
+        cur.forEach(i=>{ if(!i.r && !remT.has(i.t)) next.push(i); });
+        if(JSON.stringify(next)!==JSON.stringify(cur)){ store[path]={date:day,items:next,carried:true}; changed=true; if(day===todayStr()) notify(path); }
+      }
+      if(changed) save();
+    }catch(e){}
+  }
+  pullTasks(); setInterval(pullTasks,60000);
   return {
     doc:p=>({ set:async d=>{ store[p]=JSON.parse(JSON.stringify(d)); save(); notify(p); },
               get:async()=>snap(p),
