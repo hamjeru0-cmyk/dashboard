@@ -10,5 +10,10 @@
       {"t": "Feed Cuddley", "p": 1},
       {"t": "Test 2", "p": 3}
     ]
+  },
+  "2026-11-25": {
+    "items": [
+      {"t": "Make an n8n workflow", "p": 2}
+    ]
   }
 }
